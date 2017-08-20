@@ -10,7 +10,9 @@ const todos = [{
     text: 'First test todo'
 }, {
     _id: new ObjectID(),
-    text: 'Second test todo'
+    text: 'Second test todo',
+    completed: true,
+    completedAt: new Date().getTime(),
 }];
 
 beforeEach((done) => {
@@ -144,4 +146,67 @@ describe('DELETE /todos/:id', () => {
             .expect(404)
             .end(done);
     });
-})
+});
+describe('PATCH /todos/:id', () => {
+
+    it('should update a todo', (done) => {
+        const id_1 = todos[0]._id.toString();
+        const text = 'First test todo modified';
+        request(app)
+            .patch(`/todos/${id_1}`)
+            .send({text, completed: true})
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.text).toBe(text);
+                expect(res.body.completed).toBe(true);
+                expect(res.body.completedAt).toBeA('number');
+            })
+            .end((err, res) => {
+                if(err) return done(err);
+                Todo.findById(id_1)
+                    .then((todo) => {
+                        expect(todo.text).toBe('First test todo modified');
+                        expect(todo.completed).toBe(true);
+                        expect(todo.completedAt).toBeA('number');
+                        done();
+                    })
+                    .catch((err) => done(err));
+            })
+    });
+    it('should clear completedAt when completed is set to false', (done) => {
+        const id_2 = todos[1]._id.toString();
+        request(app)
+            .patch(`/todos/${id_2}`)
+            .send({completed: false})
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.completed).toBe(false);
+            })
+            .end((err, res) => {
+                if(err) {
+                    return done(err);
+                }
+                Todo.findById(id_2)
+                    .then((todo) => {
+                        expect(todo.completed).toBe(false);
+                        expect(todo.completedAt).toNotExist();
+                        done();
+                    })
+                    .catch((err) => done(err));
+            })
+    })
+    it('should return a 404 if no todo is deleted', (done) => {
+        const id = new ObjectID().toString();
+        request(app)
+            .patch(`/todos/${id}`)
+            .expect(404)
+            .end(done);
+    });
+    it('should return a 404 if invalid id id passed', (done) => {
+        const id = 'fjdjfjfjdj';
+        request(app)
+            .patch(`/todos/${id}`)
+            .expect(404)
+            .end(done);
+    });
+});
