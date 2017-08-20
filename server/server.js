@@ -1,3 +1,5 @@
+require('./config/config');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const { ObjectID } = require('mongodb');
@@ -9,7 +11,7 @@ const User = require('./models/user');
 
 let app = express();
 
-const port = process.env.PORT || 3000;
+// const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
@@ -90,8 +92,8 @@ app.patch('/todos/:id', (req, res) => {
             res.status(404).send();
         })
 });
-app.listen(port, () => {
-    console.log(`App started on port ${port}`);
+app.listen(process.env.PORT, () => {
+    console.log(`App started on port ${process.env.PORT}`);
 });
 
 module.exports = app;
