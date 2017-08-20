@@ -1,12 +1,15 @@
 const expect = require('expect');
 const request = require('supertest');
+const { ObjectID } = require('mongodb');
 
 const app = require ('./../server');
 const Todo = require ('./../models/todo');
 
 const todos = [{
+    _id: new ObjectID(),
     text: 'First test todo'
 }, {
+    _id: new ObjectID(),
     text: 'Second test todo'
 }];
 
@@ -70,5 +73,38 @@ describe('GET /todos', () => {
                 expect(res.body.todos.length).toBe(2);
             })
             .end(done);
-    })
-})
+    });
+});
+describe('GET /todos/:id', () => {
+    it('should return a specific todo', (done) => {
+        const id = todos[0]._id.toString();//'59992f6899291742bcadb8ee';
+        request(app)
+            .get(`/todos/${id}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo._id).toBe(id);
+                expect(res.body.todo.text).toBe(todos[0].text);
+            })
+            .end(done);
+    });
+    it('should return a 404 for incorrect id', (done) => {
+        const id = new ObjectID().toString(); // a valid but non-existent id
+        request(app)
+            .get(`/todos/${id}`)
+            .expect(404)
+            .expect((res) => {
+                expect(res.body.todo).toBe(undefined);
+            })
+            .end(done);
+    });
+    it('should return a 404 for invalid id', (done) => {
+        const id = 'asdfdlfjsofjfj';
+        request(app)
+            .get(`/todos/${id}`)
+            .expect(404)
+            .expect((res) => {
+                expect(res.body.todo).toBe(undefined);
+            })
+            .end(done);
+    });
+});
