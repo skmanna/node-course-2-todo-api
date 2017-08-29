@@ -35,15 +35,17 @@ const userSchema = new mongoose.Schema({
 userSchema.methods.toJSON = function() {
     const user = this;
     const userObject = user.toObject();
+
     return _.pick(userObject, ['_id', 'email']);
+
 }
 userSchema.methods.generateAuthToken = function() {
-    let user = this;
+    const user = this;
     const access = 'auth';
-    const token = jwt.sign({_id: user._id.toHexString(), access }, 'abc123').toString();
-    user.tokens.push({access, token});
+    const token = jwt.sign({ _id: user._id.toHexString(), access }, 'abc123').toString();
+    user.tokens.push({ access, token });
     return user.save().then(() => {
-            return token;
-        });
-}
+        return token;
+    });
+};
 module.exports = mongoose.model('User', userSchema);
