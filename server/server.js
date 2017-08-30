@@ -109,6 +109,7 @@ app.post('/users', (req, res) => {
 });
 
 app.get('/users/me', authenticate, (req, res) => {
+    // console.log("Req.user: " + req.user);
     res.send(req.user);
 });
 

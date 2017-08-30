@@ -7,6 +7,7 @@ let authenticate = (req, res, next) => {
             if (!user) {
                 Promise.reject();
             }
+            // console.log("In authenticate: " + user);
             req.user = user;
             req.token = token;
             next();
